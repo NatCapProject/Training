@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>NatCap Training</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.css" />
+
+    <!--[if lte IE 8]>
+      <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.ie.css" />
+    <![endif]-->
+    <style>
+      html, body, #map {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+ 
+	span { color: blue; font-family: sans-serif;}
+
+
+    </style>
+
+	
+    <!--switch between the different themes changing the stylesheet below - light-theme.css |dark-theme.css -->
+    <link rel="stylesheet" href="css/dark-theme.css">
+    <link rel="stylesheet" href="css/makeitresponsive.css">
+	<link 
+        rel="stylesheet" 
+        href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css"
+    />
+    <link 
+        rel="stylesheet" 
+        href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css"
+    />
+    <script src="http://libs.cartocdn.com/cartodb.js/v3/cartodb.js">
+	</script>
+    <script
+        src="http://leaflet.github.io/Leaflet.draw/leaflet.draw.js">
+    </script>
+	<script type="text/javascript" src="https://www.google.com/jsapi">
+	</script>
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js">
+	</script>
+	
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>	
+	
+  </head>
+  
+  <body>
+		<p></p>
+  		<h2>&nbsp;<a href="http://www.naturalcapitalproject.org/training-program/" target="_blank">NatCap Training Program Participation</a></h2>
+		<form name ="subscribe" id="subscribe_frm" action="#"> 
+			<p></p>
+			<h3>&nbsp;&nbsp;Query</h3><br>
+			  <b>&nbsp;&nbsp;Attendee Type: </b><input type="radio" name="a_type" id="ck_P" checked> Participant (P)
+			  <input type="radio" name="a_type" id="ck_I"> Instructor (I)
+			  <input type="radio" name="a_type" id="ck_Both"> Both<br>
+			  <b>&nbsp;&nbsp;Organization Name: </b><input type="text" style="font-size:8pt;" value="" id="ck_Org"><br>
+			  
+			  <!--<b>&nbsp;&nbsp;Year:</b> <input type="checkbox" id="ck_2013" checked> 2013
+			  <input type="checkbox" id="ck_2014" checked> 2014
+			  <input type="checkbox" id="ck_2015" checked> 2015<br>-->
+			  
+			  <b>&nbsp;&nbsp;Start Date: </b> <input type="text" style="font-size:8pt;" id="datepicker1" date_name="2013-01-01"> <b>End Date:</b> <input type="text" style="font-size:8pt;" id="datepicker2"><br>
+			  
+			  <b>&nbsp;&nbsp;Level of Instruction: </b> <input type="radio" name="level" id="ck_all" checked> All <input type="radio" name="level" id="ck_100"> 100 <input type="radio" name="level" id="ck_200"> 200<input type="radio" name="level" id="ck_300"> 300<br>
+			  <b>&nbsp;&nbsp;Sort results by: </b> <input type="radio" name="sort" id="sort_Date" checked> Date <input type="radio" name="sort" id="sort_Org" > Organization Type <input type="radio" name="sort" id="sort_Course" > Course Type<p>&nbsp;&nbsp;<input type="button" name="Submit" value="Submit" onclick="processFormData();" ></p><br>
+		</form>	
+	<h3>&nbsp;&nbsp;Table</h3>
+	<div id="Table"></div>
+    <div class="sidepanel">
+		<br>
+		<h3>Graphic</h3><br>
+		<div id="chartPie-div" style="width:350px; height: 175px;"></div><br>
+		<div id="chartBar-div"></div><br>
+		<div id="chartPie2-div" style="width:350px; height: 200px;"></div>
+		<!--<h3>Totals</h3>-->
+		<!--<div id="Totals_AT"></div>-->
+		<!--<div id="Totals_ORGTYPE"></div>-->
+		<!--<div id="Totals_LEVEL"></div>-->
+	</div>
+
+	
+
+	<script>
+	/////////////////////////////////////////////
+	// START JAVASCRIPT /////////////////////////
+	/////////////////////////////////////////////
+    $(function() {
+		var myStartDate = $("#datepicker1").attr("date_name");
+		$("#datepicker1").datepicker({ dateFormat: 'yy-mm-dd', changeYear: true}).datepicker("setDate", myStartDate);
+
+		$("#datepicker2").datepicker({ dateFormat: 'yy-mm-dd', changeYear: true}).datepicker("setDate", new Date());
+	});
+	
+	google.load("visualization", "1", {packages:["corechart"]});
+	google.load('visualization', '1', {packages: ['corechart', 'bar']});
+    google.setOnLoadCallback(drawPieChart);
+	google.setOnLoadCallback(drawBarChart);
+
+	function drawPieChart(buildPie, arr1, arr2, length, titlePie)
+	{
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Type');
+		data.addColumn('number', 'Number');
+		for ( var i = 0 ; i < length; i++ ) {
+			data.addRow([arr1[i], arr2[i]]);
+		}
+        var options = {
+          title: titlePie
+        };
+        var chart = new google.visualization.PieChart(buildPie);
+        chart.draw(data, options);
+    }
+	
+	
+	function drawBarChart(buildBar, arr1, length)
+	{	
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Year');
+		data.addColumn('number', '100-level');
+		data.addColumn('number', '200-level');
+		data.addColumn('number', '300-level');
+		for ( var i = 0 ; i < length; i += 4) {
+			var Year = arr1[i].toString();
+			data.addRow([Year, arr1[i+1], arr1[i+2], arr1[i+3]]);
+		}
+
+      var options = {
+        legend: 'none',
+		title: 'Level of Instruction by Year', height:175,width:350,
+		'colors' : ["#a1d99b","#41ab5d", "#005a32"],
+		vAxis: {title: 'Year'},
+		hAxis: {title: 'Total # of Days'}
+
+      };
+      var chart = new google.visualization.BarChart(buildBar);
+      chart.draw(data, options);
+	}	
+
+	
+	// //////////////// //////////////////////
+	// PROCESS FORM///////////////////////////
+	// //////////////// //////////////////////
+
+	function processFormData()
+	{
+	/// START QUERY
+	var Query = "";
+	var tracker = 1;
+	
+	// TYPE CHECK
+	var ck_Both = document.getElementById('ck_Both');
+	var ck_P = document.getElementById('ck_P');
+	var ck_I = document.getElementById('ck_I');
+	
+	if (ck_Both.checked){
+	  Query = Query + "(p_type = 'P' OR p_type = 'I')";
+	}	
+	else if (ck_P.checked){
+	  Query = Query + "(p_type = 'P')";
+	}
+	else {
+	  Query = Query + "(p_type = 'I')";
+	}	
+
+	// LEVEL CHECK
+	var ck_all = document.getElementById('ck_all');
+	var ck_100 = document.getElementById('ck_100');
+	var ck_200 = document.getElementById('ck_200');
+	var ck_300 = document.getElementById('ck_300');
+	if (ck_all.checked){;}
+	else if (ck_100.checked)
+	{Query = Query + " AND (l_100 IS NOT NULL)";}		
+	else if (ck_200.checked)
+	{Query = Query + " AND (l_200 IS NOT NULL)";}	
+	else if (ck_300.checked)
+	{Query = Query + " AND (l_300 IS NOT NULL)";}	
+
+
+	// ORG CHECK // FIX!
+	var ck_org = document.getElementById('ck_Org');
+	if (ck_Org.value != '' && tracker == 1){
+	  Query = Query + " AND affil_name LIKE '%"+ck_Org.value+"%' ";
+	}
+
+	// DATE CHECK
+	//SELECT * FROM pl_2013_present WHERE s_date BETWEEN '2014-01-02T00:00:00+00:00' and '2015-01-02T00:00:00+00:00'
+	var ck_datepicker1 = document.getElementById('datepicker1');
+	var ck_datepicker2 = document.getElementById('datepicker2');
+	Query = Query + " AND (s_date BETWEEN '"+ck_datepicker1.value+"T00:00:00+00:00' and '"+ck_datepicker2.value+"T00:00:00+00:00')";
+	
+	/* YEAR CHECK
+	var ck_2013 = document.getElementById('ck_2013');
+	var ck_2014 = document.getElementById('ck_2014');
+	var ck_2015 = document.getElementById('ck_2015');	
+	
+	if (ck_2013.checked || ck_2014.checked || ck_2015.checked)
+	{Query = Query + " AND ";}	
+	
+	if (ck_2013.checked && ck_2014.checked && ck_2015.checked)
+	{Query = Query + "(year = 2013 OR year = 2014 OR year = 2015)";}
+	else if (ck_2013.checked && ck_2014.checked && !(ck_2015.checked))
+	{Query = Query + "(year = 2013 OR year = 2014)";}
+	else if (ck_2013.checked && !(ck_2014.checked) && ck_2015.checked)
+	{Query = Query + "(year = 2013 OR year = 2015)";}	
+	else if (!(ck_2013.checked) && ck_2014.checked && ck_2015.checked)
+	{Query = Query + "(year = 2014 OR year = 2015)";}	
+	else if (ck_2013.checked && !(ck_2014.checked) && !(ck_2015.checked))
+	{Query = Query + "(year = 2013)";}		
+	else if (!(ck_2013.checked) && ck_2014.checked && !(ck_2015.checked))
+	{Query = Query + "(year = 2014)";}	
+	else if (!(ck_2013.checked) && !(ck_2014.checked) && ck_2015.checked)
+	{Query = Query + "(year = 2015)";}		
+	else {
+	 alert("You must check at least one year!  We assume you want to show all year.");
+	 // ADD ERROR AND BREAK
+	}*/	
+	
+
+	// TOTALS FOR GRAPHICS
+	var QueryTotals_AT = "SELECT p_type, count(p_type) FROM pl_2013_present WHERE "+Query+" GROUP BY p_type ORDER BY p_type ASC";
+	var QueryTotals_ORGTYPE = "SELECT affil_type, count(affil_type) FROM pl_2013_present WHERE "+Query+" GROUP BY affil_type ORDER BY affil_type ASC";
+	var QueryTotals_LEVEL = "SELECT sum(l_100) sum100, sum(l_200) sum200, sum(l_300) sum300, year FROM pl_2013_present WHERE "+Query+" GROUP BY year ORDER BY year ASC";	
+	var QueryTotals_COURSETYPE = "SELECT type, count(type) FROM pl_2013_present WHERE "+Query+" GROUP BY type ORDER BY type ASC";
+	
+	// alert(QueryTotals_LEVEL); // CHECKING
+	
+	// TABLE SORT BY...
+	var sort_Date = document.getElementById('sort_Date');
+	var sort_Org = document.getElementById('sort_Org');
+	if (sort_Date.checked){Query = Query + " ORDER BY s_date ASC";}  
+	else if (sort_Org.checked){Query = Query + " ORDER BY affil_type ASC";}  
+	else {Query = Query + " ORDER BY type ASC";}  
+
+	var QueryTable = "SELECT * FROM pl_2013_present WHERE " + Query;
+
+	var sql = new cartodb.SQL({ user: 'gverutes' });
+	sql.execute(QueryTable)
+	  .done(function(data) {
+
+		// read table to variable "HTML"
+		var HTML = "";
+		if (data.total_rows == 0){HTML = HTML + "<br>&nbsp;&nbsp;No results found.";}
+		else {
+		HTML = HTML + "<table><tr><th colspan=\"5\"><u>ATTENDEE INFO</u></th><th colspan=\"3\"><u>LEVEL</u></th><th colspan=\"3\"><u>COURSE INFO</u></th></tr><tr><td><b></b></td><td><b>NAME</b></td><td><b>ORG TYPE &nbsp; &nbsp;&nbsp; &nbsp;</b></td><td><b>AFFILIATION</b></td><td><b>HOME<br> COUNTRY</b>&nbsp; &nbsp; </td><td><b>100</b></td><td><b>200</b></td><td><b>300</b>&nbsp;&nbsp;</td><td><b>LOCATION</b>&nbsp; &nbsp; </td><td><b>TYPE</b>&nbsp; &nbsp; </td><td><b>DATE</b></td><td></tr>";
+		for (var i = 0; i < data.total_rows; i++) {
+		HTML = HTML + "<tr><td align=\"center\">"+data.rows[i].p_type+"&nbsp;&nbsp;</td><td>"+data.rows[i].name.substr(0,20)+"</td><td align=\"center\">"+data.rows[i].affil_type+"</td><td>"+data.rows[i].affil_name.substr(0,20)+"</td><td>"+data.rows[i].h_cntry.substr(0,14)+"</td><td align=\"center\">"+data.rows[i].l_100+"</td><td align=\"center\">"+data.rows[i].l_200+"</td><td align=\"center\">"+data.rows[i].l_300+"</td><td>"+data.rows[i].t_cntry+"</td><td>"+data.rows[i].type+"&nbsp; &nbsp; </td><td>"+data.rows[i].s_date.substr(0,10)+"</td></tr>"};
+		
+		HTML = HTML + "</table>";
+		}	
+		// write table to left panel
+		document.getElementById("Table").innerHTML = HTML;	
+	});
+	
+	sql.execute(QueryTotals_AT)
+	  .done(function(data) {		
+		var HTML2 = "<b><u>ATTENDEE TYPE</u>:</b><br>";
+		// read table to variable "HTML2"
+		for (var i = 0; i < data.total_rows; i++)
+		{
+		if (data.rows[i].p_type == 'I')
+		{HTML2 = HTML2 + "Instructors = "+data.rows[i].count+"<br>";}
+		else{HTML2 = HTML2 + "Participants = "+data.rows[i].count+"<br>";}
+		};
+		
+		// write totals to right panel
+		//document.getElementById("Totals_AT").innerHTML = HTML2;	
+	});
+	
+	sql.execute(QueryTotals_ORGTYPE)
+	  .done(function(data){		
+	  	var arr1 = []; var arr2 = [];
+		//var HTML3 = "<p></p><b><u>ORGANIZATION TYPE</u>:</b><br>";
+		// read table to variable "HTML3"
+		for (var i = 0; i < data.total_rows; i++)
+		{
+			if (data.rows[i].affil_type == '')
+			{
+			//HTML3 = HTML3 + "Unknown = "+data.rows[i].count+"<br>";
+			arr1.push("Unknown");
+			arr2.push(data.rows[i].count);	
+			}
+			else{
+			//HTML3 = HTML3 + data.rows[i].affil_type+" = "+data.rows[i].count+"<br>";
+			arr1.push(data.rows[i].affil_type);
+			arr2.push(data.rows[i].count);
+			}
+		};
+		
+		// write totals to right panel
+		//document.getElementById("Totals_ORGTYPE").innerHTML = HTML3;
+
+		drawPieChart(document.getElementById('chartPie-div'), arr1, arr2, arr1.length, 'Attendees by Organization Type'); 
+		
+	});	
+	
+	sql.execute(QueryTotals_COURSETYPE)
+	  .done(function(data){		
+	  	var arr1 = []; var arr2 = [];
+		//var HTML3 = "<p></p><b><u>ORGANIZATION TYPE</u>:</b><br>";
+		// read table to variable "HTML3"
+		for (var i = 0; i < data.total_rows; i++)
+		{
+			arr1.push(data.rows[i].type);
+			arr2.push(data.rows[i].count);
+		};
+		
+		// write totals to right panel
+		//document.getElementById("Totals_ORGTYPE").innerHTML = HTML3;
+
+		drawPieChart(document.getElementById('chartPie2-div'), arr1, arr2, arr1.length, 'Course Type'); 
+		
+	});		
+	
+	
+	sql.execute(QueryTotals_LEVEL)
+	  .done(function(data){	
+		var arr1= [];
+		var HTML4 = "<p></p><b><u>LEVEL OF INSTRUCTION</u>:</b> (# of days)<br>";
+		// read table to variable "HTML4"
+		for (var i = 0; i < data.total_rows; i++)
+		{
+		arr1.push(Math.round(data.rows[i].year));
+		arr1.push(Math.round(data.rows[i].sum100));
+		arr1.push(Math.round(data.rows[i].sum200));
+		arr1.push(Math.round(data.rows[i].sum300));
+		
+		var HTML4 = HTML4 + "Year: "+Math.round(data.rows[i].year)+"<br><li>100 Level = "+Math.round(data.rows[i].sum100)+"<br><li>200 Level = "+Math.round(data.rows[i].sum200)+"<br><li>300 Level = "+Math.round(data.rows[i].sum300)+"<br>";
+		}
+	
+		// write totals to right panel
+		//document.getElementById("Totals_LEVEL").innerHTML = HTML4;	
+
+		drawBarChart(document.getElementById('chartBar-div'), arr1, arr1.length); 		
+	});	
+
+	}
+
+    </script>
+  </body>
+</html>
